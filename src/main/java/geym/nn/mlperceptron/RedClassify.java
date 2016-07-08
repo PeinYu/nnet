@@ -6,6 +6,7 @@ import org.neuroph.core.Neuron;
 import org.neuroph.core.data.DataSet;
 import org.neuroph.core.data.DataSetRow;
 import org.neuroph.core.events.LearningEvent;
+import org.neuroph.core.learning.IterativeLearning;
 import org.neuroph.core.transfer.TransferFunction;
 import org.neuroph.nnet.comp.neuron.BiasNeuron;
 import org.neuroph.nnet.comp.neuron.InputNeuron;
@@ -26,7 +27,7 @@ public class RedClassify extends NeuralNetwork implements LearningEventListener 
         new RedClassify().run();
     }
 
-    public void run() throws IOException {
+    public void run()  {
         //数据集含有2个输入一个输出
         DataSet trainingSet = new DataSet(2, 1);
         trainingSet.addRow(new DataSetRow(new double[]{0, 0}, new double[]{0}));
@@ -43,18 +44,20 @@ public class RedClassify extends NeuralNetwork implements LearningEventListener 
 
         //测试感知机输出是否正确
         System.out.println("Testing trained neural network");
-        for(DataSetRow row: trainingSet.getRows()) {
-            testNeuralNetwork(myPerception, row);
-        }
+        testNeuralNetwork(myPerception, trainingSet);
+
     }
 
-    public static void testNeuralNetwork(NeuralNetwork neuralNet, DataSetRow row) {
-        neuralNet.setInput(row.getInput());
-        neuralNet.calculate();
-        double[] networkOutput = neuralNet.getOutput();
-        System.out.println("Input: " + Arrays.toString(row.getInput()));
-        System.out.println("Output:" + Arrays.toString(networkOutput));
+    public static void testNeuralNetwork(NeuralNetwork neuralNet, DataSet row) {
 
+        for(DataSetRow testSetRow : row.getRows()) {
+            neuralNet.setInput(testSetRow.getInput());
+            neuralNet.calculate();
+            double[] networkOutput = neuralNet.getOutput();
+
+            System.out.println("Input: " + Arrays.toString(testSetRow.getInput()));
+            System.out.println("Output:" + Arrays.toString(networkOutput));
+        }
     }
 
     private void createNetwork(int inputNeuronsCount) {
@@ -85,7 +88,8 @@ public class RedClassify extends NeuralNetwork implements LearningEventListener 
 
     @Override
     public void handleLearningEvent(LearningEvent event) {
-        //LMS lms = (LMS) event.getSource();
-        System.out.println("interation");
+        IterativeLearning bp = (IterativeLearning) event.getSource();
+        System.out.println("iterate:" + bp.getCurrentIteration());
+        System.out.println("weights:" + Arrays.toString(bp.getNeuralNetwork().getWeights()));
     }
 }
