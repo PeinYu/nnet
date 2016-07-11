@@ -15,7 +15,7 @@ import org.neuroph.util.*;
 import org.neuroph.core.NeuralNetwork;
 import org.neuroph.core.events.LearningEventListener;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
@@ -27,15 +27,37 @@ public class RedClassify extends NeuralNetwork implements LearningEventListener 
         new RedClassify().run();
     }
 
+    public List<DataSetRow> getTrainData() throws IOException {
+        InputStream in = RedClassify.class.getResourceAsStream("redpal1.xlsx");
+        BufferedReader br = new BufferedReader(new InputStreamReader(new DataInputStream(in)));
+        List<Double> fe = new Vector<Double>();
+        List<DataSetRow> re = new Vector<DataSetRow>();
+        String line = null;
+        for ((line = br.readLine())!=null){
+
+            fe.add(0,Double.parseDouble(line));
+            double[] inputs=new Double(){}
+            double[] outputs=new Double(){}
+
+        }
+
+
+        return re;
+    }
     public void run()  {
         //数据集含有2个输入一个输出
-        DataSet trainingSet = new DataSet(2, 1);
-        trainingSet.addRow(new DataSetRow(new double[]{0, 0}, new double[]{0}));
-        trainingSet.addRow(new DataSetRow(new double[]{0, 1}, new double[]{1}));
-        trainingSet.addRow(new DataSetRow(new double[]{1, 0}, new double[]{1}));
-        trainingSet.addRow(new DataSetRow(new double[]{1, 1}, new double[]{1}));
+        DataSet trainingSet = new DataSet(4, 1);
+        trainingSet.addRow(new DataSetRow(new double[]{0, 0, 0, 0}, new double[]{-0.5}));
+        trainingSet.addRow(new DataSetRow(new double[]{0, 1, 1, 0,}, new double[]{1.5}));
+        trainingSet.addRow(new DataSetRow(new double[]{1, 0, 0, 1}, new double[]{1.5}));
+        trainingSet.addRow(new DataSetRow(new double[]{1, 1, 1, 1}, new double[]{3}));
+        DataSet testingSet = new DataSet(4, 1);
+        testingSet.addRow(new DataSetRow(new double[]{0, 1, 1, 0}, new double[]{-0.5}));
+        testingSet.addRow(new DataSetRow(new double[]{0, 1, 1, 0,}, new double[]{1.5}));
+        testingSet.addRow(new DataSetRow(new double[]{0, 0, 0, 0}, new double[]{1}));
+        testingSet.addRow(new DataSetRow(new double[]{1, 1, 1, 1}, new double[]{1}));
         //感知机有2个输入
-        SimplePerceptron myPerception = new SimplePerceptron(2);
+        SimplePerceptron myPerception = new SimplePerceptron(4);
         LMS learningRule = (LMS) myPerception.getLearningRule();
         learningRule.addListener(this);
         //进行学习
@@ -44,7 +66,7 @@ public class RedClassify extends NeuralNetwork implements LearningEventListener 
 
         //测试感知机输出是否正确
         System.out.println("Testing trained neural network");
-        testNeuralNetwork(myPerception, trainingSet);
+        testNeuralNetwork(myPerception, testingSet);
 
     }
 
