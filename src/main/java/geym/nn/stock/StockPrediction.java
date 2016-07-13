@@ -45,6 +45,7 @@ public class StockPrediction  implements LearningEventListener{
         while((line=br.readLine())!=null){
             prices.add(0,Double.parseDouble(line)/10000);
         }
+        System.out.println(prices);
         for(int i=0;i<prices.size()-4;i++){
 
             double[] inputs=new double[]{prices.get(i),prices.get(i+1),prices.get(i+2),prices.get(i+3)};

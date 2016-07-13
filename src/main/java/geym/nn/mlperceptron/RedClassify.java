@@ -16,9 +16,9 @@ import org.neuroph.core.NeuralNetwork;
 import org.neuroph.core.events.LearningEventListener;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
+
+import jxl.Workbook;
 
 
 public class RedClassify extends NeuralNetwork implements LearningEventListener {
@@ -28,36 +28,50 @@ public class RedClassify extends NeuralNetwork implements LearningEventListener 
     }
 
     public List<DataSetRow> getTrainData() throws IOException {
-        InputStream in = RedClassify.class.getResourceAsStream("redpal1.xlsx");
+        InputStream in = RedClassify.class.getResourceAsStream("/geym/nn/mlperceptron/redpal1.txt");
         BufferedReader br = new BufferedReader(new InputStreamReader(new DataInputStream(in)));
-        List<Double> fe = new Vector<Double>();
         List<DataSetRow> re = new Vector<DataSetRow>();
+
         String line = null;
-        for ((line = br.readLine())!=null){
+        while ((line = br.readLine())!=null) {
+            List<Double> fe = new Vector<Double>();
+            String[] s = line.split("\t");
+            for (int i = 0; i < s.length; i++) {
+                fe.add(0, Double.parseDouble(s[i]));
+            }
+            //System.out.println(fe);
+            double[] inputs = new double[]{fe.get(0),fe.get(1),fe.get(2),fe.get(3),fe.get(4),fe.get(5),fe.get(6),fe.get(7)};
+            double[] outputs = new double[]{fe.get(8)};
+            for(int j=0; j<fe.size();j++){
+            //System.out.println(j+"ddd"+fe.get(j));
+            }
+            //double[] inputs = new double[]{7.170731707,4001.27,600.0,1000.0,0.0,50.0,50000.0,1430495.0};
+            //double[] outputs = new double[]{-0.2693};
+            re.add(new DataSetRow(inputs, outputs));
 
-            fe.add(0,Double.parseDouble(line));
-            double[] inputs=new Double(){}
-            double[] outputs=new Double(){}
-
+            continue;
         }
-
-
+        //System.out.println(re);
         return re;
     }
-    public void run()  {
+    public void run() throws IOException {
         //数据集含有2个输入一个输出
-        DataSet trainingSet = new DataSet(4, 1);
-        trainingSet.addRow(new DataSetRow(new double[]{0, 0, 0, 0}, new double[]{-0.5}));
-        trainingSet.addRow(new DataSetRow(new double[]{0, 1, 1, 0,}, new double[]{1.5}));
-        trainingSet.addRow(new DataSetRow(new double[]{1, 0, 0, 1}, new double[]{1.5}));
-        trainingSet.addRow(new DataSetRow(new double[]{1, 1, 1, 1}, new double[]{3}));
-        DataSet testingSet = new DataSet(4, 1);
-        testingSet.addRow(new DataSetRow(new double[]{0, 1, 1, 0}, new double[]{-0.5}));
-        testingSet.addRow(new DataSetRow(new double[]{0, 1, 1, 0,}, new double[]{1.5}));
-        testingSet.addRow(new DataSetRow(new double[]{0, 0, 0, 0}, new double[]{1}));
-        testingSet.addRow(new DataSetRow(new double[]{1, 1, 1, 1}, new double[]{1}));
+        DataSet trainingSet = new DataSet(8, 1);
+        List<DataSetRow> rows =getTrainData();
+        for(int i=0; i<rows.size()-1 ;i++){
+            trainingSet.addRow(rows.get(i));
+        }
+        //trainingSet.addRow(new DataSetRow(new double[]{0, 0, 0, 0}, new double[]{-0.5}));
+        //trainingSet.addRow(new DataSetRow(new double[]{0, 1, 1, 0,}, new double[]{1.5}));
+        //trainingSet.addRow(new DataSetRow(new double[]{1, 0, 0, 1}, new double[]{1.5}));
+        //trainingSet.addRow(new DataSetRow(new double[]{1, 1, 1, 1}, new double[]{3}));
+        //DataSet testingSet = new DataSet(4, 1);
+        //testingSet.addRow(new DataSetRow(new double[]{0, 1, 1, 0}, new double[]{-0.5}));
+        //testingSet.addRow(new DataSetRow(new double[]{0, 1, 1, 0,}, new double[]{1.5}));
+        //testingSet.addRow(new DataSetRow(new double[]{0, 0, 0, 0}, new double[]{1}));
+        //testingSet.addRow(new DataSetRow(new double[]{1, 1, 1, 1}, new double[]{1}));
         //感知机有2个输入
-        SimplePerceptron myPerception = new SimplePerceptron(4);
+        SimplePerceptron myPerception = new SimplePerceptron(8);
         LMS learningRule = (LMS) myPerception.getLearningRule();
         learningRule.addListener(this);
         //进行学习
@@ -66,7 +80,7 @@ public class RedClassify extends NeuralNetwork implements LearningEventListener 
 
         //测试感知机输出是否正确
         System.out.println("Testing trained neural network");
-        testNeuralNetwork(myPerception, testingSet);
+        testNeuralNetwork(myPerception, trainingSet);
 
     }
 
@@ -112,6 +126,6 @@ public class RedClassify extends NeuralNetwork implements LearningEventListener 
     public void handleLearningEvent(LearningEvent event) {
         IterativeLearning bp = (IterativeLearning) event.getSource();
         System.out.println("iterate:" + bp.getCurrentIteration());
-        System.out.println("weights:" + Arrays.toString(bp.getNeuralNetwork().getWeights()));
+        //System.out.println("weights:" + Arrays.toString(bp.getNeuralNetwork().getWeights()));
     }
 }
